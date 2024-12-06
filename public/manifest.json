@@ -2,7 +2,7 @@
   "name": "Pomotodo",
   "short_name": "Pomotodo",
   "description": "A Pomodoro timer with task tracking",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#fff1f2",
   "theme_color": "#be123c",
