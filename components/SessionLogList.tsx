@@ -4,10 +4,10 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 type SessionLog = {
   duration: number
-  focusRating: number
+  focusrating: number
   notes: string
-  startTime: Date
-  endTime: Date
+  starttime: Date
+  endtime: Date
 }
 
 interface SessionLogListProps {
@@ -26,14 +26,14 @@ export default function SessionLogList({ logs }: SessionLogListProps) {
             <div key={index} className="mb-4 p-4 bg-white/5 rounded-lg">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-gray-300">
-                  {formatDistanceToNow(log.startTime, { addSuffix: true })}
+                  {formatDistanceToNow(log.starttime, { addSuffix: true })}
                 </span>
                 <span className="text-sm font-semibold text-white">
                   Duration: {Math.floor(log.duration / 60)}:{(log.duration % 60).toString().padStart(2, '0')}
                 </span>
               </div>
               <div className="mb-2">
-                <span className="text-sm font-medium text-white">Focus Rating: {log.focusRating}/10</span>
+                <span className="text-sm font-medium text-white">Focus Rating: {log.focusrating}/10</span>
               </div>
               {log.notes && (
                 <div className="text-sm text-gray-300">
