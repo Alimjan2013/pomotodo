@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
@@ -18,8 +18,10 @@ type SessionLog = {
   endTime: Date
 }
 
-const FOCUS_DURATION = 25 * 60 // 25 minutes
-const BREAK_DURATION = 5 * 60 // 5 minutes
+const FOCUS_DURATION = 0.3 * 60 // 25 minutes
+const SHORT_BREAK_DURATION = 0.1 * 60 // 5 minutes
+const LONG_BREAK_DURATION = 0.2 * 60 // 15 minutes
+const SESSIONS_BEFORE_LONG_BREAK = 4
 
 export default function PomodoroTimer() {
   const [timerState, setTimerState] = useState<TimerState>('IDLE')
@@ -29,11 +31,13 @@ export default function PomodoroTimer() {
   const [focusRating, setFocusRating] = useState(5)
   const [notes, setNotes] = useState('')
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null)
+  const [sessionCount, setSessionCount] = useState(0)
 
   const startTimer = useCallback(() => {
     setIsActive(true)
     setTimerState('FOCUS')
     setSessionStartTime(new Date())
+    setTimeLeft(FOCUS_DURATION)
     requestNotificationPermission()
   }, [])
 
@@ -53,8 +57,10 @@ export default function PomodoroTimer() {
 
   const endSession = useCallback(() => {
     if (timerState === 'FOCUS') {
+      const newSessionCount = sessionCount + 1
+      setSessionCount(newSessionCount)
       setTimerState('BREAK')
-      setTimeLeft(BREAK_DURATION)
+      setTimeLeft(newSessionCount % SESSIONS_BEFORE_LONG_BREAK === 0 ? LONG_BREAK_DURATION : SHORT_BREAK_DURATION)
       setIsActive(true)
       showNotification('Focus session completed', 'Time for a break!')
     } else if (timerState === 'BREAK') {
@@ -63,7 +69,7 @@ export default function PomodoroTimer() {
       setIsActive(false)
       showNotification('Break time over', 'Ready to reflect on your session?')
     }
-  }, [timerState])
+  }, [timerState, sessionCount])
 
   const logSession = useCallback(() => {
     if (sessionStartTime) {
@@ -83,7 +89,12 @@ export default function PomodoroTimer() {
     setFocusRating(5)
     setNotes('')
     setSessionStartTime(null)
-  }, [focusRating, notes, sessionStartTime])
+    if (sessionCount >= SESSIONS_BEFORE_LONG_BREAK - 1) {
+      setSessionCount(0)
+    } else {
+      setSessionCount(prevCount => prevCount + 1)
+    }
+  }, [focusRating, notes, sessionStartTime, sessionCount])
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
@@ -158,7 +169,7 @@ export default function PomodoroTimer() {
             fill="none"
             strokeWidth="5%"
             strokeDasharray={`${2 * Math.PI * 45}%`}
-            strokeDashoffset={`${2 * Math.PI * 45 * (1 - timeLeft / (timerState === 'BREAK' ? BREAK_DURATION : FOCUS_DURATION))}%`}
+            strokeDashoffset={`${2 * Math.PI * 45 * (1 - timeLeft / (timerState === 'BREAK' ? (sessionCount % SESSIONS_BEFORE_LONG_BREAK === 0 ? LONG_BREAK_DURATION : SHORT_BREAK_DURATION) : FOCUS_DURATION))}%`}
             strokeLinecap="round"
           />
         </svg>
