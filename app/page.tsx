@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTimer } from "../hooks/useTimer";
@@ -8,8 +8,10 @@ import { formatTime } from "../utils/formatTime";
 import ReflectionForm from "../components/ReflectionForm";
 import SessionLogList from "../components/SessionLogList";
 import { signout } from "@/app/authentication/actions";
-import { toast } from "sonner"
-import { useRouter } from 'next/navigation'
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { createClient } from '@/lib/supabase/client'
+
 
 
 type SessionLog = {
@@ -21,7 +23,46 @@ type SessionLog = {
 };
 
 export default function PomodoroTimer() {
-  const router = useRouter()
+  const router = useRouter();
+  const supabase = createClient();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Error fetching user:', error);
+      } else {
+        setUserId(data.user.id);
+      }
+    };
+
+    fetchUser();
+  }, [supabase]);
+
+  async function insertSessionLog(duration: number, focusRating: number, notes: string, startTime: Date, endTime: Date) {
+    if (!userId) {
+      console.error('User is not authenticated');
+      return;
+    }
+
+    const { data, error } = await supabase.from("sessionlog").insert([
+      {
+        user_id: userId,
+        duration: duration.toFixed(4),        
+        focusrating: focusRating,
+        notes,
+        starttime:startTime,
+        endtime:endTime,
+      },
+    ]);
+
+    if (error) {
+      console.error("Error inserting session log:", error);
+    } else {
+      console.log("Session log inserted:", data);
+    }
+  }
 
   const {
     time,
@@ -67,14 +108,17 @@ export default function PomodoroTimer() {
 
   const handleReflectionComplete = (focusRating: number, notes: string) => {
     if (sessionStartTime) {
+      const endTime = new Date();
+      const duration = (endTime.getTime() - sessionStartTime.getTime()) / 60000; // Duration in minutes
       const newLog: SessionLog = {
-        duration: 0.3 * 60, // This should be the actual duration
+        duration,
         focusRating,
         notes,
         startTime: sessionStartTime,
-        endTime: new Date(),
+        endTime,
       };
       setSessionLogs([...sessionLogs, newLog]);
+      insertSessionLog(duration, focusRating, notes, sessionStartTime, endTime); // Call the function to insert the session log
     }
     setShowReflection(false);
     setSessionCount(sessionCount + 1);
@@ -142,16 +186,16 @@ export default function PomodoroTimer() {
       </Card>
       {sessionLogs.length > 0 && <SessionLogList logs={sessionLogs} />}
       <Button
-            className=' border border-customeBorder '
-            onClick={() => {
-                console.log('logout')
-                toast.success("User has successfully logged out.")
-                signout()
-                router.push('/authentication/login') // Redirect to home page
-            }}
-        >
-            logout
-        </Button>
+        className=" border border-customeBorder "
+        onClick={() => {
+          console.log("logout");
+          toast.success("User has successfully logged out.");
+          signout();
+          router.push("/authentication/login"); // Redirect to home page
+        }}
+      >
+        logout
+      </Button>
     </div>
   );
 }
