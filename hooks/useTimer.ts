@@ -20,9 +20,25 @@ export function useTimer({
   const [sessionCount, setSessionCount] = useState(0)
   const [isLongBreak, setIsLongBreak] = useState(false)
 
+
+  const requestNotificationPermission = () => {
+    if ('Notification' in window) {
+      Notification.requestPermission()
+    }
+  }
+
+  const showNotification = (title: string, body: string) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body })
+    }
+  }
+
   const start = useCallback(() => {
     setTimerState('RUNNING')
+    requestNotificationPermission()
   }, [])
+
+
 
   const pause = useCallback(() => {
     setTimerState('PAUSED')
@@ -47,6 +63,8 @@ export function useTimer({
 
   const endSession = useCallback(() => {
     setTimerState('COMPLETE')
+    showNotification('Focus session completed', 'Time for a break!')
+
     // Reset the time to the focus duration
     setTime(focusDuration)
   }, [focusDuration])

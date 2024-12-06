@@ -46,6 +46,7 @@ export default function PomodoroTimer() {
     }
   }, [timerState])
 
+
   const handleStartSession = () => {
     setSessionStartTime(new Date())
     start()
@@ -134,7 +135,7 @@ export default function PomodoroTimer() {
           )}
         </CardContent>
       </Card>
-      <SessionLogList logs={sessionLogs} />
+      {sessionLogs.length > 0 && (<SessionLogList logs={sessionLogs} />)}
     </div>
   )
 }
