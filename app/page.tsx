@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTimer } from '../hooks/useTimer'
@@ -27,7 +27,7 @@ export default function PomodoroTimer() {
     pause,
     resume,
     reset,
-    startBreak,
+    // startBreak,
     endSession
   } = useTimer({
     focusDuration: 0.3 * 60,
@@ -40,6 +40,12 @@ export default function PomodoroTimer() {
   const [sessionLogs, setSessionLogs] = useState<SessionLog[]>([])
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null)
 
+  useEffect(() => {
+    if (timerState === 'COMPLETE') {
+      setShowReflection(true)
+    }
+  }, [timerState])
+
   const handleStartSession = () => {
     setSessionStartTime(new Date())
     start()
@@ -49,6 +55,14 @@ export default function PomodoroTimer() {
     endSession()
     setShowReflection(true)
   }
+
+  const handlePause = () => {
+    pause()
+  }
+
+  // const handleStartBreak = () => {
+  //   startBreak()
+  // }
 
   const handleReflectionComplete = (focusRating: number, notes: string) => {
     if (sessionStartTime) {
@@ -95,13 +109,22 @@ export default function PomodoroTimer() {
                   <Button onClick={handleStartSession}>Start</Button>
                 )}
                 {timerState === 'RUNNING' && (
-                  <Button onClick={handleEndSession}>End Session</Button>
+                  <>
+                    <Button onClick={handlePause}>Pause</Button>
+                    <Button onClick={handleEndSession}>End Session</Button>
+                  </>
                 )}
                 {timerState === 'PAUSED' && (
                   <Button onClick={resume}>Resume</Button>
                 )}
                 {timerState === 'BREAK' && (
-                  <Button onClick={handleEndSession}>End Break</Button>
+                  <>
+                    {/* <Button onClick={handleStartBreak}>Start Break</Button> */}
+                    <Button onClick={handleEndSession}>End Break</Button>
+                  </>
+                )}
+                {(timerState === 'BREAK' || timerState === 'COMPLETE') && (
+                  <Button onClick={handleEndSession}>End Session</Button>
                 )}
                 <Button onClick={reset}>Reset</Button>
               </div>

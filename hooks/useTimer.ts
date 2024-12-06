@@ -60,7 +60,7 @@ export function useTimer({
           if (prevTime <= 1) {
             if (timerState === 'RUNNING') {
               startBreak()
-              return shouldStartLongBreak ? longBreakDuration : shortBreakDuration
+              return isLongBreak ? longBreakDuration : shortBreakDuration
             } else if (timerState === 'BREAK') {
               endSession()
             }
@@ -76,7 +76,7 @@ export function useTimer({
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [timerState, startBreak, endSession, longBreakDuration, shortBreakDuration])
+  }, [timerState, startBreak, endSession, longBreakDuration, shortBreakDuration, isLongBreak])
 
   return {
     time,
