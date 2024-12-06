@@ -102,9 +102,9 @@ export default function PomodoroTimer() {
     showReflection,
     setShowReflection,
   } = useTimer({
-    focusDuration: 0.3 * 60,
-    shortBreakDuration: 0.1 * 60,
-    longBreakDuration: 0.2 * 60,
+    focusDuration: 25 * 60,
+    shortBreakDuration: 5 * 60,
+    longBreakDuration: 15 * 60,
     sessionsBeforeLongBreak: 4,
   });
 
