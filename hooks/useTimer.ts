@@ -19,6 +19,7 @@ export function useTimer({
   const [timerState, setTimerState] = useState<TimerState>('IDLE')
   const [sessionCount, setSessionCount] = useState(0)
   const [isLongBreak, setIsLongBreak] = useState(false)
+  const [showReflection, setShowReflection] = useState(false)
 
 
   const requestNotificationPermission = () => {
@@ -96,6 +97,12 @@ export function useTimer({
     }
   }, [timerState, startBreak, endSession, longBreakDuration, shortBreakDuration, isLongBreak])
 
+  useEffect(() => {
+    if (timerState === 'COMPLETE') {
+      setShowReflection(true)
+    }
+  }, [timerState])
+
   return {
     time,
     timerState,
@@ -107,7 +114,9 @@ export function useTimer({
     resume,
     reset,
     startBreak,
-    endSession
+    endSession,
+    showReflection,
+    setShowReflection
   }
 }
 

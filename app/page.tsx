@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTimer } from '../hooks/useTimer'
@@ -28,7 +28,9 @@ export default function PomodoroTimer() {
     resume,
     reset,
     // startBreak,
-    endSession
+    endSession,
+    showReflection,
+    setShowReflection,
   } = useTimer({
     focusDuration: 0.3 * 60,
     shortBreakDuration: 0.1 * 60,
@@ -36,16 +38,8 @@ export default function PomodoroTimer() {
     sessionsBeforeLongBreak: 4
   })
 
-  const [showReflection, setShowReflection] = useState(false)
   const [sessionLogs, setSessionLogs] = useState<SessionLog[]>([])
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null)
-
-  useEffect(() => {
-    if (timerState === 'COMPLETE') {
-      setShowReflection(true)
-    }
-  }, [timerState])
-
 
   const handleStartSession = () => {
     setSessionStartTime(new Date())
