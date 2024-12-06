@@ -1,22 +1,28 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useTimer } from '../hooks/useTimer'
-import { formatTime } from '../utils/formatTime'
-import ReflectionForm from '../components/ReflectionForm'
-import SessionLogList from '../components/SessionLogList'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTimer } from "../hooks/useTimer";
+import { formatTime } from "../utils/formatTime";
+import ReflectionForm from "../components/ReflectionForm";
+import SessionLogList from "../components/SessionLogList";
+import { signout } from "@/app/authentication/actions";
+import { toast } from "sonner"
+import { useRouter } from 'next/navigation'
+
 
 type SessionLog = {
-  duration: number
-  focusRating: number
-  notes: string
-  startTime: Date
-  endTime: Date
-}
+  duration: number;
+  focusRating: number;
+  notes: string;
+  startTime: Date;
+  endTime: Date;
+};
 
 export default function PomodoroTimer() {
+  const router = useRouter()
+
   const {
     time,
     timerState,
@@ -35,25 +41,25 @@ export default function PomodoroTimer() {
     focusDuration: 0.3 * 60,
     shortBreakDuration: 0.1 * 60,
     longBreakDuration: 0.2 * 60,
-    sessionsBeforeLongBreak: 4
-  })
+    sessionsBeforeLongBreak: 4,
+  });
 
-  const [sessionLogs, setSessionLogs] = useState<SessionLog[]>([])
-  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null)
+  const [sessionLogs, setSessionLogs] = useState<SessionLog[]>([]);
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
 
   const handleStartSession = () => {
-    setSessionStartTime(new Date())
-    start()
-  }
+    setSessionStartTime(new Date());
+    start();
+  };
 
   const handleEndSession = () => {
-    endSession()
-    setShowReflection(true)
-  }
+    endSession();
+    setShowReflection(true);
+  };
 
   const handlePause = () => {
-    pause()
-  }
+    pause();
+  };
 
   // const handleStartBreak = () => {
   //   startBreak()
@@ -66,15 +72,15 @@ export default function PomodoroTimer() {
         focusRating,
         notes,
         startTime: sessionStartTime,
-        endTime: new Date()
-      }
-      setSessionLogs([...sessionLogs, newLog])
+        endTime: new Date(),
+      };
+      setSessionLogs([...sessionLogs, newLog]);
     }
-    setShowReflection(false)
-    setSessionCount(sessionCount + 1)
-    reset()
-    setSessionStartTime(null)
-  }
+    setShowReflection(false);
+    setSessionCount(sessionCount + 1);
+    reset();
+    setSessionStartTime(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col items-center justify-center p-4">
@@ -91,34 +97,39 @@ export default function PomodoroTimer() {
                 {formatTime(time)}
               </div>
               <div className="text-xl font-semibold text-white">
-                {timerState === 'BREAK' ? (isLongBreak ? 'Long Break' : 'Short Break') : 
-                 timerState === 'RUNNING' ? 'Focus Time' : 
-                 timerState === 'PAUSED' ? 'Paused' : 
-                 timerState === 'COMPLETE' ? 'Session Complete' : 'Ready'}
+                {timerState === "BREAK"
+                  ? isLongBreak
+                    ? "Long Break"
+                    : "Short Break"
+                  : timerState === "RUNNING"
+                  ? "Focus Time"
+                  : timerState === "PAUSED"
+                  ? "Paused"
+                  : timerState === "COMPLETE"
+                  ? "Session Complete"
+                  : "Ready"}
               </div>
-              <div className="text-md text-white">
-                Session: {sessionCount}
-              </div>
+              <div className="text-md text-white">Session: {sessionCount}</div>
               <div className="flex space-x-4">
-                {timerState === 'IDLE' && (
+                {timerState === "IDLE" && (
                   <Button onClick={handleStartSession}>Start</Button>
                 )}
-                {timerState === 'RUNNING' && (
+                {timerState === "RUNNING" && (
                   <>
                     <Button onClick={handlePause}>Pause</Button>
                     <Button onClick={handleEndSession}>End Session</Button>
                   </>
                 )}
-                {timerState === 'PAUSED' && (
+                {timerState === "PAUSED" && (
                   <Button onClick={resume}>Resume</Button>
                 )}
-                {timerState === 'BREAK' && (
+                {timerState === "BREAK" && (
                   <>
                     {/* <Button onClick={handleStartBreak}>Start Break</Button> */}
                     <Button onClick={handleEndSession}>End Break</Button>
                   </>
                 )}
-                {(timerState === 'BREAK' || timerState === 'COMPLETE') && (
+                {(timerState === "BREAK" || timerState === "COMPLETE") && (
                   <Button onClick={handleEndSession}>End Session</Button>
                 )}
                 <Button onClick={reset}>Reset</Button>
@@ -129,8 +140,18 @@ export default function PomodoroTimer() {
           )}
         </CardContent>
       </Card>
-      {sessionLogs.length > 0 && (<SessionLogList logs={sessionLogs} />)}
+      {sessionLogs.length > 0 && <SessionLogList logs={sessionLogs} />}
+      <Button
+            className=' border border-customeBorder '
+            onClick={() => {
+                console.log('logout')
+                toast.success("User has successfully logged out.")
+                signout()
+                router.push('/authentication/login') // Redirect to home page
+            }}
+        >
+            logout
+        </Button>
     </div>
-  )
+  );
 }
-
